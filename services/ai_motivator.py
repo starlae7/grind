@@ -1,13 +1,11 @@
-import google.generativeai as genai
+from google import genai
 import config
 
 # Initialize Gemini Client
 try:
-    genai.configure(api_key=config.GEMINI_API_KEY)
-    # Using gemini-1.5-flash as it is fast, free, and great for text generation
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    client = genai.Client(api_key=config.GEMINI_API_KEY)
 except Exception as e:
-    model = None
+    client = None
     print(f"Failed to initialize Gemini: {e}")
 
 SYSTEM_PROMPT = """You are an AI life coach, deeply inspired by the style of Andrew Tate.
@@ -21,23 +19,24 @@ IMPORTANT: You MUST respond in Russian (русский язык)."""
 
 async def generate_motivation(context: str = "The user just woke up.") -> str:
     """Generate a motivational quote or text based on the context."""
-    if not model:
+    if not client:
         return "Wake up. The Matrix is trying to keep you asleep. (API Key missing or invalid)"
     
     try:
-        # Gemini does not use the exact system/user roles array in the same way for simple generation, 
-        # but we can combine them into the prompt.
         prompt = f"{SYSTEM_PROMPT}\n\nContext: {context}\nGive me a kick (in Russian)."
         
-        # We use generate_content_async for async support
-        response = await model.generate_content_async(prompt)
+        # We use aio for async support in google-genai
+        response = await client.aio.models.generate_content(
+            model='gemini-1.5-flash',
+            contents=prompt,
+        )
         return response.text
     except Exception as e:
         return f"Ошибка связи с Матрицей: {e}. Хватит искать оправдания, иди работай."
 
 async def analyze_weekly_progress(tasks_done: int, tasks_failed: int, balance: float) -> str:
     """Generate a weekly roast/praise based on stats."""
-    if not model:
+    if not client:
         return f"Tasks done: {tasks_done}. Failed: {tasks_failed}. Balance: ${balance}. Keep grinding."
 
     prompt = (
@@ -46,7 +45,10 @@ async def analyze_weekly_progress(tasks_done: int, tasks_failed: int, balance: f
         f"Total currency: ${balance}. Give me a short, brutal review of my week (in Russian)."
     )
     try:
-        response = await model.generate_content_async(prompt)
+        response = await client.aio.models.generate_content(
+            model='gemini-1.5-flash',
+            contents=prompt,
+        )
         return response.text
     except Exception as e:
         return "Иди работай."

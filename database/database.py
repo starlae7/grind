@@ -1,8 +1,10 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from .models import Base
+import os
 
-# Using SQLite for simplicity and easy deployment
-DATABASE_URL = "sqlite+aiosqlite:///./bot_database.db"
+# Using /app/data if it exists (for Bothost persistence), else local file
+db_path = "/app/data/bot_database.db" if os.path.isdir("/app/data") else "./bot_database.db"
+DATABASE_URL = f"sqlite+aiosqlite:///{db_path}"
 
 engine = create_async_engine(DATABASE_URL, echo=False)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)

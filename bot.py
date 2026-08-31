@@ -61,6 +61,9 @@ def main():
     )
     webhook_requests_handler.register(app, path=WEBHOOK_PATH)
 
+    # Initialize aiogram startup/shutdown events
+    setup_application(app, dp, bot=bot)
+
     # Serve the webapp folder as static files
     # This allows the Mini App to be accessible at https://<domain>/webapp/index.html
     current_dir = os.path.dirname(os.path.abspath(__file__))
