@@ -68,8 +68,8 @@ def main():
     app.router.add_static("/webapp", path=webapp_dir, name="webapp")
 
     # Bothost usually passes the port in the PORT environment variable
-    # If not, fallback to 8080
-    port = int(os.getenv("PORT", 8080))
+    # If not, fallback to 3000 to match Bothost default
+    port = int(os.getenv("PORT", 3000))
     logger.info(f"Starting web server on port {port}")
     
     web.run_app(app, host="0.0.0.0", port=port)
